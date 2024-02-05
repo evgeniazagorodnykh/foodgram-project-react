@@ -11,3 +11,4 @@ pytest-pythonpath==0.7.3
 djoser==2.1.0
 webcolors==1.11.1
 PyYAML==6.0
+psycopg2-binary==2.9.3
