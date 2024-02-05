@@ -77,6 +77,17 @@ class CustomUserViewSet(UserViewSet):
     def get_subscription(self, request):
         limit = request.GET.get('recipes_limit', None)
         user = self.request.user
+        subscriptions = Subscription.objects.filter(user=user)
+        page = self.paginate_queryset(subscriptions)
+        if page is not None:
+            serializer = SubscriptionSerializer(
+                page,
+                many=True,
+                context={
+                    'recipes_limit': limit
+                }
+            )
+            return self.get_paginated_response(serializer.data)
         serializer =  SubscriptionSerializer(
             Subscription.objects.filter(user=user),
             many=True,
@@ -127,7 +138,8 @@ class RecipeViewSet(viewsets.ModelViewSet):
         methods=['GET'],
         detail=False,
         url_name='download_shopping_cart',
-        url_path='download_shopping_cart'
+        url_path='download_shopping_cart',
+        permission_classes = [IsAuthenticated],
     )
     def download_shopping_cart(self, request):
         user = self.request.user
@@ -176,6 +188,12 @@ class SubscriptionViewSet(CreateDestroyViewSet):
     serializer_class = SubscriptionSerializer
     queryset = Subscription.objects.select_related('user').all()
     permission_classes = [IsAuthenticated]
+
+    def get_serializer_context(self):
+        limit = self.request.GET.get('recipes_limit', None)
+        context = super().get_serializer_context()
+        context.update({'recipes_limit': limit})
+        return context
     
     @action(methods=['DELETE'], detail=True)
     def delete(self, request, *args, **kwargs):
