@@ -146,7 +146,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         shopping = Shopping.objects.filter(user=user)
         shopping_dict = {}
         path = "shopping_cart.txt"
-        file = open("shopping_cart.txt", "w+")
+        file = open(path, "w+")
         file.writelines('Список покупок:\n')
         for elem in shopping:
             ingredients = IngredientRecipe.objects.filter(recipe=elem.recipe)
@@ -159,9 +159,12 @@ class RecipeViewSet(viewsets.ModelViewSet):
                     shopping_dict[name] = count
         for keys,values in shopping_dict.items():
             file.writelines(f'{keys} - {values}\n')
-        data = file.read()
-        response = HttpResponse(data, "text")
+        file.close()
+        with open(path, 'rb') as f:
+            data = f.read()
+        response = HttpResponse(data, content_type='text')
         response['Content-Disposition'] = f'attachment; filename={os.path.basename(path)}'
+        file.close()
         return response
 
 
