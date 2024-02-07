@@ -394,10 +394,22 @@ class RecipeShortSerializer(serializers.ModelSerializer):
 
 class SubscriptionSerializer(serializers.ModelSerializer):
     """Сериализатор модели `Subscription`."""
-    username = serializers.SlugField(read_only=True, source='subscriber.username')
-    email = serializers.EmailField(read_only=True, source='subscriber.email')
-    first_name = serializers.CharField(read_only=True, source='subscriber.first_name')
-    last_name = serializers.CharField(read_only=True, source='subscriber.last_name')
+    username = serializers.SlugField(
+        read_only=True,
+        source='subscriber.username'
+    )
+    email = serializers.EmailField(
+        read_only=True,
+        source='subscriber.email'
+    )
+    first_name = serializers.CharField(
+        read_only=True,
+        source='subscriber.first_name'
+    )
+    last_name = serializers.CharField(
+        read_only=True,
+        source='subscriber.last_name'
+    )
     is_subscribed = serializers.SerializerMethodField()
     recipes = serializers.SerializerMethodField()
     recipes_count = serializers.SerializerMethodField()
@@ -431,7 +443,10 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return Recipe.objects.filter(author=obj.subscriber).count()
 
     def get_is_subscribed(self, obj):
-        return Subscription.objects.filter(user=obj.user, subscriber=obj.subscriber).exists()
+        return Subscription.objects.filter(
+            user=obj.user,
+            subscriber=obj.subscriber
+        ).exists()
 
     def create(self, validated_data):
         user = self.context.get('request').user
@@ -450,9 +465,18 @@ class SubscriptionSerializer(serializers.ModelSerializer):
 
 class ShoppingSerializer(serializers.ModelSerializer):
     """Сериализатор модели `Shopping`."""
-    name = serializers.CharField(read_only=True, source='recipe.name')
-    image = serializers.CharField(read_only=True, source='recipe.image')
-    cooking_time = serializers.IntegerField(read_only=True, source='recipe.cooking_time')
+    name = serializers.CharField(
+        read_only=True,
+        source='recipe.name'
+    )
+    image = serializers.CharField(
+        read_only=True,
+        source='recipe.image'
+    )
+    cooking_time = serializers.IntegerField(
+        read_only=True,
+        source='recipe.cooking_time'
+    )
 
     class Meta:
         model = Shopping

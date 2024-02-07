@@ -6,8 +6,14 @@ User = get_user_model()
 
 class Ingredient(models.Model):
     """Модель ингредиента."""
-    name = models.CharField(max_length=200, verbose_name='Название')
-    measurement_unit = models.CharField(max_length=200, verbose_name='Единицы измерения')
+    name = models.CharField(
+        max_length=200,
+        verbose_name='Название'
+    )
+    measurement_unit = models.CharField(
+        max_length=200,
+        verbose_name='Единицы измерения'
+    )
 
     class Meta:
         verbose_name_plural = 'Ингредиенты'
@@ -23,11 +29,11 @@ class Tag(models.Model):
         verbose_name='Название',
     )
     color = models.CharField(
-        max_length=16, 
+        max_length=16,
         verbose_name='Цвет'
     )
     slug = models.SlugField(
-        unique=True, 
+        unique=True,
         max_length=200,
         verbose_name='Слаг'
     )
@@ -42,8 +48,8 @@ class Tag(models.Model):
 class Recipe(models.Model):
     """Модель рецепта."""
     author = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
+        User,
+        on_delete=models.CASCADE,
         related_name='recipes',
         verbose_name='Автор'
     )
@@ -51,8 +57,12 @@ class Recipe(models.Model):
         max_length=256,
         verbose_name='Название'
     )
-    text = models.TextField(verbose_name='Описание')
-    cooking_time = models.PositiveIntegerField(verbose_name='Время приготовления')
+    text = models.TextField(
+        verbose_name='Описание'
+    )
+    cooking_time = models.PositiveIntegerField(
+        verbose_name='Время приготовления'
+    )
     ingredients = models.ManyToManyField(
         Ingredient,
         through='IngredientRecipe',
@@ -78,14 +88,14 @@ class Recipe(models.Model):
 class IngredientRecipe(models.Model):
     """Модель связи ингредиента и рецепта."""
     ingredient = models.ForeignKey(
-        Ingredient, 
-        on_delete=models.CASCADE, 
+        Ingredient,
+        on_delete=models.CASCADE,
         related_name='ingredient_recipe'
     )
     amount = models.PositiveIntegerField(verbose_name='Количество')
     recipe = models.ForeignKey(
-        Recipe, 
-        on_delete=models.CASCADE, 
+        Recipe,
+        on_delete=models.CASCADE,
         related_name='ingredient_recipe'
     )
 
@@ -100,7 +110,7 @@ class TagRecipe(models.Model):
 
     def __str__(self):
         return f'{self.tag} {self.recipe}'
-    
+
 
 class Subscription(models.Model):
     """Модель подписки."""
@@ -108,7 +118,7 @@ class Subscription(models.Model):
         User, on_delete=models.CASCADE)
     subscriber = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='is_subscribed')
-    
+
 
 class Favorite(models.Model):
     """Модель избранного."""

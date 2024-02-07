@@ -67,12 +67,12 @@ class CustomUserViewSet(UserViewSet):
         return super().get_permissions()
 
     @action(
-        methods = ['GET'],
-        detail = False,
-        url_name = 'subscriptions',
-        url_path = 'subscriptions',
-        permission_classes = [IsAuthenticated],
-        pagination_class = CustomPagination
+        methods=['GET'],
+        detail=False,
+        url_name='subscriptions',
+        url_path='subscriptions',
+        permission_classes=[IsAuthenticated],
+        pagination_class=CustomPagination
     )
     def get_subscription(self, request):
         limit = request.GET.get('recipes_limit', None)
@@ -88,7 +88,7 @@ class CustomUserViewSet(UserViewSet):
                 }
             )
             return self.get_paginated_response(serializer.data)
-        serializer =  SubscriptionSerializer(
+        serializer = SubscriptionSerializer(
             Subscription.objects.filter(user=user),
             many=True,
             context={
@@ -139,7 +139,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         detail=False,
         url_name='download_shopping_cart',
         url_path='download_shopping_cart',
-        permission_classes = [IsAuthenticated],
+        permission_classes=[IsAuthenticated],
     )
     def download_shopping_cart(self, request):
         user = self.request.user
@@ -153,15 +153,17 @@ class RecipeViewSet(viewsets.ModelViewSet):
             for ingredient in ingredients:
                 name = ingredient.ingredient
                 count = ingredient.amount
-                if shopping_dict.get(name) != None:
+                if shopping_dict.get(name) is not None:
                     shopping_dict[name] = shopping_dict[name] + count
                 else:
                     shopping_dict[name] = count
-        for keys,values in shopping_dict.items():
+        for keys, values in shopping_dict.items():
             file.writelines(f'{keys} - {values}\n')
         data = file.read()
+        print(data)
         response = HttpResponse(data, "text")
-        response['Content-Disposition'] = f'attachment; filename={os.path.basename(path)}'
+        response['Content-Disposition'] = f'filename={os.path.basename(path)}'
+        file.close()
         return response
 
 
@@ -194,12 +196,15 @@ class SubscriptionViewSet(CreateDestroyViewSet):
         context = super().get_serializer_context()
         context.update({'recipes_limit': limit})
         return context
-    
+
     @action(methods=['DELETE'], detail=True)
     def delete(self, request, *args, **kwargs):
         user = self.request.user
         subscriber = get_object_or_404(User, id=self.kwargs.get('id'))
-        if not Subscription.objects.filter(user=user, subscriber=subscriber).exists():
+        if not Subscription.objects.filter(
+            user=user,
+            subscriber=subscriber
+        ).exists():
             return Response(
                 status=status.HTTP_400_BAD_REQUEST
             )
