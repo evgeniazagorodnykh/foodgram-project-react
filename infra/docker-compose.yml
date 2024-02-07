@@ -16,7 +16,7 @@ services:
     build: ../backend/
     env_file: .env
     volumes:
-      - static:/app/static/
+      - static:/app/static_django/
       - media:/app/media/
     depends_on:
       - db
@@ -30,12 +30,12 @@ services:
     build: ../nginx/
     env_file: .env
     ports:
-      # - 8000:80
-      - 80:80
+      - 8000:80
+      #- 80:80
     volumes:
-      - static:static/
+      - static:/static_django/
       - media:/media/
-      - static_frontend:/static_frontend/
       - ./docs/:/usr/share/nginx/html/api/docs/
+      - static_frontend:/static_frontend/
     depends_on:
-      - db
+      - backend
