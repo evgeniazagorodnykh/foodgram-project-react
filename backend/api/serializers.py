@@ -435,7 +435,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
             recipes = recipes[:int(limit)]
         print(recipes)
         return RecipeShortSerializer(
-            recipes,
+            recipes.order_by('-id'),
             many=True
         ).data
 

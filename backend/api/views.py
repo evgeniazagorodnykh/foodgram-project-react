@@ -112,16 +112,19 @@ class IngredientViewSet(viewsets.ReadOnlyModelViewSet):
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     pagination_class = None
     filterset_fields = ('name',)
-    search_fields = ('name',)
+    search_fields = ('^name',)
 
 
 class RecipeViewSet(viewsets.ModelViewSet):
     """Обработка запросов `recpes`."""
-    queryset = Recipe.objects.select_related('author').all()
+    queryset = Recipe.objects.select_related(
+        'author'
+    ).all()
     permission_classes = (AuthorOrReadOnly,)
     filter_backends = (DjangoFilterBackend,)
     filterset_class = ModelFilter
     pagination_class = CustomPagination
+    ordering = ['-id']
 
     def get_serializer_class(self):
         if self.action in ('list', 'retrieve'):
