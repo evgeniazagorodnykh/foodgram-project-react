@@ -30,7 +30,7 @@ services:
     build: ../nginx/
     env_file: .env
     ports:
-      - 8000:80
+      - 8080:80
       #- 80:80
     volumes:
       - static:/static_django/
