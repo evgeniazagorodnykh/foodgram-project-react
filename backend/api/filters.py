@@ -23,9 +23,11 @@ class ModelFilter(django_filters.FilterSet):
         boolean = {0: False, 1: True}
         model = {'favorites': Favorite, 'shoppings': Shopping}
         list_recipes = []
+        user = self.request.user
         for recipe in queryset:
             if model[name].objects.filter(
-                recipe=recipe
+                user=user,
+                recipe=recipe,
             ).exists() == boolean[value]:
                 list_recipes.append(recipe.id)
         return queryset.filter(id__in=list_recipes)

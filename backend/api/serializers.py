@@ -428,14 +428,16 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         )
 
     def get_recipes(self, obj):
-        recipes = Recipe.objects.filter(author=obj.subscriber).all()
+        recipes = Recipe.objects.filter(
+            author=obj.subscriber
+        ).all().order_by('-id')
         limit = self.context.get('recipes_limit')
         print(limit)
         if limit:
             recipes = recipes[:int(limit)]
         print(recipes)
         return RecipeShortSerializer(
-            recipes.order_by('-id'),
+            recipes,
             many=True
         ).data
 
