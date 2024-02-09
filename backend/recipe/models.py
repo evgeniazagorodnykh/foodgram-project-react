@@ -100,6 +100,14 @@ class IngredientRecipe(models.Model):
         related_name='ingredient_recipe'
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['ingredient', 'recipe'],
+                name='unique_ingredient_recipe'
+            ),
+        ]
+
     def __str__(self):
         return f'{self.ingredient} {self.recipe}'
 
@@ -108,6 +116,14 @@ class TagRecipe(models.Model):
     """Модель связи тега и рецепта."""
     tag = models.ForeignKey(Tag, on_delete=models.CASCADE)
     recipe = models.ForeignKey(Recipe, on_delete=models.CASCADE)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['tag', 'recipe'],
+                name='unique_tag_recipe'
+            ),
+        ]
 
     def __str__(self):
         return f'{self.tag} {self.recipe}'
@@ -120,6 +136,14 @@ class Subscription(models.Model):
     subscriber = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='is_subscribed')
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'subscriber'],
+                name='unique_subscription'
+            ),
+        ]
+
 
 class Favorite(models.Model):
     """Модель избранного."""
@@ -128,6 +152,14 @@ class Favorite(models.Model):
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, related_name='favorites')
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_favorites'
+            ),
+        ]
+
 
 class Shopping(models.Model):
     """Модель списка покупок."""
@@ -135,3 +167,11 @@ class Shopping(models.Model):
         User, on_delete=models.CASCADE)
     recipe = models.ForeignKey(
         Recipe, on_delete=models.CASCADE, related_name='shoppings')
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['user', 'recipe'],
+                name='unique_shoppings'
+            ),
+        ]
