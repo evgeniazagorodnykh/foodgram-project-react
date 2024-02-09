@@ -12,20 +12,31 @@ class ModelFilter(django_filters.FilterSet):
     )
     is_favorited = django_filters.NumberFilter(
         field_name='favorites',
-        method='filter_boolean'
+        method='filter_favorites'
     )
     is_in_shopping_cart = django_filters.NumberFilter(
         field_name='shoppings',
-        method='filter_boolean'
+        method='filter_shoppings'
     )
 
-    def filter_boolean(self, queryset, name, value):
+    def filter_favorites(self, queryset, name, value):
         boolean = {0: False, 1: True}
-        model = {'favorites': Favorite, 'shoppings': Shopping}
         list_recipes = []
         user = self.request.user
         for recipe in queryset:
-            if model[name].objects.filter(
+            if Favorite.objects.filter(
+                user=user,
+                recipe=recipe,
+            ).exists() == boolean[value]:
+                list_recipes.append(recipe.id)
+        return queryset.filter(id__in=list_recipes)
+
+    def filter_shoppings(self, queryset, name, value):
+        boolean = {0: False, 1: True}
+        list_recipes = []
+        user = self.request.user
+        for recipe in queryset:
+            if Shopping.objects.filter(
                 user=user,
                 recipe=recipe,
             ).exists() == boolean[value]:
