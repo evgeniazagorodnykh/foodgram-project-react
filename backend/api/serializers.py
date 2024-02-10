@@ -191,15 +191,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             'cooking_time'
         )
 
-    def validate(self, attrs):
-        if 'ingredients' not in attrs:
-            raise serializers.ValidationError(
-                'Нельзя добавить рецепт без ингредиентов')
-        if 'tags' not in attrs:
-            raise serializers.ValidationError(
-                'Нельзя добавить рецепт без тегов')
-        return super().validate(attrs)
-
     def validate_ingredients(self, value):
         if not value:
             raise serializers.ValidationError(
