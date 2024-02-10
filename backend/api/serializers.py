@@ -198,7 +198,9 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         ingredients = {ingredient['ingredient__id'] for ingredient in value}
         if len(value) != len(ingredients):
             raise serializers.ValidationError(
-                'Нельзя дважды добавить ингредиент')
+                f'''Нельзя дважды добавить ингредиент
+                {value}
+                ''')
         for ingredient in ingredients:
             if not Ingredient.objects.filter(id=ingredient).exists():
                 raise serializers.ValidationError(
