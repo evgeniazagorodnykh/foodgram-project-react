@@ -4,6 +4,7 @@ import webcolors
 from rest_framework import serializers
 from django.core.files.base import ContentFile
 
+from recipe.models import Subscription
 
 class Hex2NameColor(serializers.Field):
     """Сериализатор поля цвета тега."""

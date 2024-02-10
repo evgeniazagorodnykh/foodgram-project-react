@@ -19,6 +19,14 @@ from .fields import Hex2NameColor, Base64ImageField
 
 User = get_user_model()
 
+def is_subscribed(self, obj):
+        if self.context.get('request').user.is_authenticated:
+            user = self.context.get('request').user
+            return Subscription.objects.filter(
+                user=user, subscriber=obj
+            ).exists()
+        return False
+
 
 class CustomUserCreateSerializer(UserCreateSerializer):
     """Сериализатор модели `User` для регистрации."""
@@ -51,7 +59,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
 class CustomUserSerializer(UserSerializer):
     """Сериализатор модели `User` для вывода."""
-    is_subscribed = serializers.SerializerMethodField()
+    is_subscribed = serializers.SerializerMethodField('get_is_subscribed')
 
     class Meta:
         model = User
@@ -64,7 +72,7 @@ class CustomUserSerializer(UserSerializer):
             'is_subscribed'
         )
 
-    def get_is_subscribed(self, obj):
+    def is_subscribed(self, obj):
         if self.context.get('request').user.is_authenticated:
             user = self.context.get('request').user
             return Subscription.objects.filter(
@@ -115,7 +123,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 class IngredientCreateRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор модели `Ingredient` для создания рецепта."""
     amount = serializers.IntegerField(min_value=1)
-    id = serializers.IntegerField(min_value=1, source='ingredient_id')
+    id = serializers.IntegerField(min_value=1, source='ingredient__id')
 
     class Meta:
         model = IngredientRecipe
@@ -127,12 +135,12 @@ class IngredientCreateRecipeSerializer(serializers.ModelSerializer):
 
 class IngredientRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор модели `Ingredient` для вывода рецепта."""
-    id = serializers.IntegerField(min_value=1, source='ingredient_id')
     amount = serializers.IntegerField(min_value=1)
-    name = serializers.CharField(source='ingredient_name')
+    name = serializers.CharField(source='ingredient.name')
     measurement_unit = serializers.CharField(
         source='ingredient.measurement_unit'
     )
+    id = serializers.IntegerField(min_value=1, source='ingredient.id')
 
     class Meta:
         model = IngredientRecipe
@@ -273,10 +281,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 class RecipeReadSerializer(serializers.ModelSerializer):
     """Сериализатор модели `Recipe` для вывода рецепта."""
     image = Base64ImageField(read_only=True)
-    ingredients = IngredientRecipeSerializer(
-        IngredientRecipe.objects.all(),
-        many=True,
-    )
+    ingredients = serializers.SerializerMethodField()
     tags = TagSerializer(
         Tag.objects.all(),
         many=True,
@@ -312,6 +317,10 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             user = self.context.get('request').user
             return Shopping.objects.filter(user=user, recipe=obj).exists()
         return False
+    
+    def get_ingredients(self, obj):
+        ingredients = IngredientRecipe.objects.filter(recipe=obj)
+        return IngredientRecipeSerializer(ingredients, many=True).data
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
