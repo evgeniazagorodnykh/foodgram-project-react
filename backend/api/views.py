@@ -140,13 +140,13 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_cart(self, request):
         user = self.request.user
-        shopping = Shopping.objects.filter(user=user)
+        shopping = Shopping.objects.filter(user=user).values('recipe')
         # shopping_cart = {}
         # lines = []
         file_name = 'shopping_cart.txt'
         # lines.append('Список покупок:\n')
-        data = shopping.values_list('recipe__ingredients', flat=True)
-        response_content = '\n'.join(data)
+        data = shopping.values_list('ingredients__ingredient', 'ingredients__amount')
+        response_content = data
         # for elem in shopping:
         #     ingredients = IngredientRecipe.objects.filter(recipe=elem.recipe)
         #     for ingredient in ingredients:
@@ -177,11 +177,11 @@ class FavoriteViewSet(CreateDestroyViewSet):
     def delete(self, request, *args, **kwargs):
         user = self.request.user
         recipe = get_object_or_404(Recipe, id=self.kwargs.get('id'))
-        if not Favorite.objects.filter(user=user, recipe=recipe).exists():
+        if not self.queryset.filter(user=user, recipe=recipe).exists():
             return Response(
                 status=status.HTTP_400_BAD_REQUEST
             )
-        Favorite.objects.get(user=user, recipe=recipe).delete()
+        self.queryset.get(user=user, recipe=recipe).delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
@@ -218,7 +218,7 @@ class ShoppingViewSet(CreateDestroyViewSet):
     queryset = Shopping.objects.select_related('user').all()
     permission_classes = [IsAuthenticated]
 
-    @action(methods=['DELETE'], detail=True, )
+    @action(methods=['DELETE'], detail=True,)
     def delete(self, request, *args, **kwargs):
         user = self.request.user
         recipe = get_object_or_404(Recipe, id=self.kwargs.get('id'))
