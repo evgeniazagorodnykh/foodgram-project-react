@@ -19,14 +19,6 @@ from .fields import Hex2NameColor, Base64ImageField
 
 User = get_user_model()
 
-def is_subscribed(self, obj):
-        if self.context.get('request').user.is_authenticated:
-            user = self.context.get('request').user
-            return Subscription.objects.filter(
-                user=user, subscriber=obj
-            ).exists()
-        return False
-
 
 class CustomUserCreateSerializer(UserCreateSerializer):
     """Сериализатор модели `User` для регистрации."""
@@ -317,7 +309,7 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             user = self.context.get('request').user
             return Shopping.objects.filter(user=user, recipe=obj).exists()
         return False
-    
+
     def get_ingredients(self, obj):
         ingredients = IngredientRecipe.objects.filter(recipe=obj)
         return IngredientRecipeSerializer(ingredients, many=True).data
