@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.db.models import Sum
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
@@ -21,6 +22,7 @@ from recipe.models import (
     Subscription,
     Favorite,
     Shopping,
+    IngredientRecipe
 )
 from .serializers import (
     RecipeReadSerializer,
@@ -140,28 +142,27 @@ class RecipeViewSet(viewsets.ModelViewSet):
     )
     def download_shopping_cart(self, request):
         user = self.request.user
-        shopping = Shopping.objects.filter(user=user).values('recipe')
-        # shopping_cart = {}
-        # lines = []
-        file_name = 'shopping_cart.txt'
-        # lines.append('Список покупок:\n')
-        data = shopping.values_list(
-            'ingredients__ingredient',
-            'ingredients__amount'
+        shopping = Shopping.objects.filter(user=user).values_list(
+            'recipe',
+            flat=True
         )
-        response_content = data
-        # for elem in shopping:
-        #     ingredients = IngredientRecipe.objects.filter(recipe=elem.recipe)
-        #     for ingredient in ingredients:
-        #         name = ingredient.ingredient
-        #         count = ingredient.amount
-        #         if shopping_cart.get(name) is not None:
-        #             shopping_cart[name] = shopping_cart[name] + count
-        #         else:
-        #             shopping_cart[name] = count
-        # for keys, values in shopping_cart.items():
-        #     lines.append(f'{keys} - {values}')
-        # response_content = '\n'.join(lines)
+        shopping_cart = {}
+        lines = []
+        file_name = 'shopping_cart.txt'
+        lines.append('Список покупок:\n')
+        ingredients = IngredientRecipe.objects.filter(
+            recipe_in=shopping
+        ).values('ingredient').annotate(totals=Sum('amount'))
+        for ingredient in ingredients:
+            lines.append('{0} - {1}'.format(
+                ingredient['ingredient'],
+                ingredient['totals']
+            )
+            )
+        response_content = '\n'.join(lines)
+        for keys, values in shopping_cart.items():
+            lines.append(f'{keys} - {values}')
+        response_content = '\n'.join(lines)
 
         response = HttpResponse(response_content, content_type="text")
         response['Content-Disposition'] = 'attachment; filename={0}'.format(

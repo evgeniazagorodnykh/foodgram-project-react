@@ -191,11 +191,11 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError(
                 'Нельзя добавить рецепт без ингредиентов')
-        ingredient_set = {ingredient['ingredient__id'] for ingredient in value}
-        if len(value) != len(ingredient_set):
+        ingredients = {ingredient['ingredient__id'] for ingredient in value}
+        if len(value) != len(ingredients):
             raise serializers.ValidationError(
                 'Нельзя дважды добавить ингредиент')
-        for ingredient in ingredient_set:
+        for ingredient in ingredients:
             if not Ingredient.objects.filter(id=ingredient).exists():
                 raise serializers.ValidationError(
                     'Нельзя добавить несуществующий ингредиент')
@@ -205,29 +205,27 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError(
                 'Нельзя добавить рецепт без тегов')
-        tags_set = set(value)
-        if len(value) != len(tags_set):
+        tags = set(value)
+        if len(value) != len(tags):
             raise serializers.ValidationError(
                 'Нельзя дважды добавить тег')
-        for tag in tags_set:
+        for tag in tags:
             if not Tag.objects.filter(id=tag.id).exists():
                 raise serializers.ValidationError(
                     'Нельзя добавить несуществующий тег')
         return value
 
-    def create_ingredients(self, ingredients, recipe):
-        ingredient_list = []
-        for ingredient in ingredients:
-            current_ingredient = Ingredient.objects.get(
-                id=ingredient.pop('ingredient__id')
-            )
-            ingredient_list.append(
-                IngredientRecipe.objects.create(
-                    ingredient=current_ingredient,
+    def create_ingredients(self, received_ingredients, recipe):
+        ingredients = []
+        for ingredient in received_ingredients:
+            ingredients.append(
+                IngredientRecipe(
+                    ingredient_id=ingredient.pop('ingredient__id'),
                     amount=ingredient.pop('amount'),
                     recipe=recipe
                 )
             )
+        IngredientRecipe.objects.bulk_create(ingredients)
 
     def create(self, validated_data):
         ingredients = validated_data.pop('ingredients')
