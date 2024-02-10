@@ -1,5 +1,3 @@
-import os
-
 from django.http import HttpResponse
 from django.contrib.auth import get_user_model
 from django.shortcuts import get_object_or_404
@@ -23,7 +21,6 @@ from recipe.models import (
     Subscription,
     Favorite,
     Shopping,
-    IngredientRecipe,
 )
 from .serializers import (
     RecipeReadSerializer,
@@ -144,27 +141,29 @@ class RecipeViewSet(viewsets.ModelViewSet):
     def download_shopping_cart(self, request):
         user = self.request.user
         shopping = Shopping.objects.filter(user=user)
-        shopping_dict = {}
-        path = "shopping_cart.txt"
-        file = open(path, "w+")
-        file.writelines('Список покупок:\n')
-        for elem in shopping:
-            ingredients = IngredientRecipe.objects.filter(recipe=elem.recipe)
-            for ingredient in ingredients:
-                name = ingredient.ingredient
-                count = ingredient.amount
-                if shopping_dict.get(name) is not None:
-                    shopping_dict[name] = shopping_dict[name] + count
-                else:
-                    shopping_dict[name] = count
-        for keys, values in shopping_dict.items():
-            file.writelines(f'{keys} - {values}\n')
-        file.close()
-        with open(path, 'rb') as f:
-            data = f.read()
-        response = HttpResponse(data, content_type='text')
-        response['Content-Disposition'] = f'filename={os.path.basename(path)}'
-        file.close()
+        # shopping_cart = {}
+        lines = []
+        file_name = 'shopping_cart.txt'
+        lines.writelines('Список покупок:\n')
+        data = shopping.values_list('recipe__ingredients', flat=True)
+        response_content = '\n'.join(data)
+        # for elem in shopping:
+        #     ingredients = IngredientRecipe.objects.filter(recipe=elem.recipe)
+        #     for ingredient in ingredients:
+        #         name = ingredient.ingredient
+        #         count = ingredient.amount
+        #         if shopping_cart.get(name) is not None:
+        #             shopping_cart[name] = shopping_cart[name] + count
+        #         else:
+        #             shopping_cart[name] = count
+        # for keys, values in shopping_cart.items():
+        #     lines.append(f'{keys} - {values}')
+        # response_content = '\n'.join(lines)
+
+        response = HttpResponse(response_content, content_type="text")
+        response['Content-Disposition'] = 'attachment; filename={0}'.format(
+            file_name
+        )
         return response
 
 
