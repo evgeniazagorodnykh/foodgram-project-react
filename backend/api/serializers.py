@@ -204,14 +204,14 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError(
                 'Нельзя добавить рецепт без ингредиентов')
-        ingredients = {ingredient['ingredient__id'] for ingredient in value}
+        ingredients = {ingredient['id'] for ingredient in value}
         if len(value) != len(ingredients):
             raise serializers.ValidationError(
                 'Нельзя дважды добавить ингредиент')
         for ingredient in ingredients:
             if not Ingredient.objects.filter(id=ingredient).exists():
                 raise serializers.ValidationError(
-                    f'Нельзя добавить несуществующий ингредиент {value}')
+                    'Нельзя добавить несуществующий ингредиент')
         return value
 
     def validate_tags(self, value):
@@ -233,7 +233,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         for ingredient in received_ingredients:
             ingredients.append(
                 IngredientRecipe(
-                    ingredient_id=ingredient.pop('ingredient__id'),
+                    ingredient_id=ingredient.pop('id'),
                     amount=ingredient.pop('amount'),
                     recipe=recipe
                 )
