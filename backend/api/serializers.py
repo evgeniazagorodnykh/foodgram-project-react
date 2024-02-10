@@ -1,13 +1,8 @@
-import base64
-
-import webcolors
-from django.core.files.base import ContentFile
 from rest_framework import serializers
 from rest_framework.validators import UniqueValidator, UniqueTogetherValidator
 from django.contrib.auth import get_user_model
 from djoser.serializers import UserSerializer, UserCreateSerializer
 from django.shortcuts import get_object_or_404
-
 
 from recipe.models import (
     Recipe,
@@ -19,34 +14,10 @@ from recipe.models import (
     Favorite,
     Shopping
 )
+from .fields import Hex2NameColor, Base64ImageField
 
 
 User = get_user_model()
-
-
-class Hex2NameColor(serializers.Field):
-    """Сериализатор поля цвета тега."""
-    def to_representation(self, value):
-        return value
-
-    def to_internal_value(self, data):
-        try:
-            data = webcolors.hex_to_name(data)
-        except ValueError:
-            raise serializers.ValidationError('Для этого цвета нет имени')
-        return data
-
-
-class Base64ImageField(serializers.ImageField):
-    """Сериализатор поля картинки рецепта."""
-    def to_internal_value(self, data):
-        if isinstance(data, str) and data.startswith('data:image'):
-            format, imgstr = data.split(';base64,')
-            ext = format.split('/')[-1]
-
-            data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
-
-        return super().to_internal_value(data)
 
 
 class CustomUserCreateSerializer(UserCreateSerializer):

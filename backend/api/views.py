@@ -145,7 +145,10 @@ class RecipeViewSet(viewsets.ModelViewSet):
         # lines = []
         file_name = 'shopping_cart.txt'
         # lines.append('Список покупок:\n')
-        data = shopping.values_list('ingredients__ingredient', 'ingredients__amount')
+        data = shopping.values_list(
+            'ingredients__ingredient',
+            'ingredients__amount'
+        )
         response_content = data
         # for elem in shopping:
         #     ingredients = IngredientRecipe.objects.filter(recipe=elem.recipe)
