@@ -157,7 +157,6 @@ class RecipeViewSet(viewsets.ModelViewSet):
             'recipe',
             flat=True
         )
-        shopping_cart = {}
         lines = []
         file_name = 'shopping_cart.txt'
         lines.append('Список покупок:\n')
@@ -166,15 +165,11 @@ class RecipeViewSet(viewsets.ModelViewSet):
         ).values('ingredient').annotate(totals=Sum('amount'))
         for ingredient in ingredients:
             lines.append('{0} - {1}'.format(
-                ingredient['ingredient'],
+                Ingredient.objects.get(id=ingredient['ingredient']),
                 ingredient['totals']
             )
             )
         response_content = '\n'.join(lines)
-        for keys, values in shopping_cart.items():
-            lines.append(f'{keys} - {values}')
-        response_content = '\n'.join(lines)
-
         response = HttpResponse(response_content, content_type="text")
         response['Content-Disposition'] = 'attachment; filename={0}'.format(
             file_name

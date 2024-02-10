@@ -187,6 +187,15 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             'cooking_time'
         )
 
+    def validate(self, attrs):
+        if 'ingredients' not in attrs:
+            raise serializers.ValidationError(
+                'Нельзя добавить рецепт без ингредиентов')
+        if 'tags' not in attrs:
+            raise serializers.ValidationError(
+                'Нельзя добавить рецепт без тегов')
+        return super().validate(attrs)
+
     def validate_ingredients(self, value):
         if not value:
             raise serializers.ValidationError(
@@ -245,20 +254,12 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
             'cooking_time', instance.cooking_time
         )
         instance.image = validated_data.get('image', instance.image)
-        if 'ingredients' in validated_data:
-            ingredients_data = validated_data.pop('ingredients')
-            instance.ingredients.clear()
-            self.create_ingredients(ingredients_data, instance)
-        else:
-            raise serializers.ValidationError(
-                'Нельзя изменить рецепт без ингредиентов')
-        if 'tags' in validated_data:
-            tags_data = validated_data.pop('tags')
-            instance.tags.clear()
-            instance.tags.set(tags_data)
-        else:
-            raise serializers.ValidationError(
-                'Нельзя изменить рецепт без тегов')
+        ingredients_data = validated_data.pop('ingredients')
+        instance.ingredients.clear()
+        self.create_ingredients(ingredients_data, instance)
+        tags_data = validated_data.pop('tags')
+        instance.tags.clear()
+        instance.tags.set(tags_data)
         instance.save()
         return instance
 
