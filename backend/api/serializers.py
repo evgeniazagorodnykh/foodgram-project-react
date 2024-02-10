@@ -162,7 +162,11 @@ class TagRecipeSerializer(serializers.ModelSerializer):
 class RecipeWriteSerializer(serializers.ModelSerializer):
     """Сериализатор модели `Recipe` для создания рецепта."""
     image = Base64ImageField(required=True)
-    ingredients = IngredientCreateRecipeSerializer(many=True, required=True)
+    ingredients = IngredientCreateRecipeSerializer(
+        IngredientRecipe.objects.all(),
+        many=True,
+        required=True,
+    )
     tags = serializers.PrimaryKeyRelatedField(
         queryset=Tag.objects.all(),
         many=True,
@@ -207,7 +211,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         for ingredient in ingredients:
             if not Ingredient.objects.filter(id=ingredient).exists():
                 raise serializers.ValidationError(
-                    'Нельзя добавить несуществующий ингредиент')
+                    f'Нельзя добавить несуществующий ингредиент {value}')
         return value
 
     def validate_tags(self, value):
@@ -247,7 +251,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         return recipe
 
     def update(self, instance, validated_data):
-        # instance.author = validated_data.get('author', instance.author)
+        instance.author = validated_data.get('author', instance.author)
         ingredients_data = validated_data.pop('ingredients')
         instance.ingredients.clear()
         self.create_ingredients(ingredients_data, instance)
