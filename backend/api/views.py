@@ -42,7 +42,18 @@ User = get_user_model()
 
 class CreateDestroyViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
                            viewsets.GenericViewSet):
-    pass
+    permission_classes = [IsAuthenticated]
+
+    @action(methods=['DELETE'], detail=True)
+    def delete(self, request, *args, **kwargs):
+        user = self.request.user
+        recipe = get_object_or_404(Recipe, id=self.kwargs.get('id'))
+        if not self.queryset.filter(user=user, recipe=recipe).exists():
+            return Response(
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        self.queryset.get(user=user, recipe=recipe).delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class CustomPagination(PageNumberPagination):
@@ -151,7 +162,7 @@ class RecipeViewSet(viewsets.ModelViewSet):
         file_name = 'shopping_cart.txt'
         lines.append('Список покупок:\n')
         ingredients = IngredientRecipe.objects.filter(
-            recipe_in=shopping
+            recipe_id__in=shopping
         ).values('ingredient').annotate(totals=Sum('amount'))
         for ingredient in ingredients:
             lines.append('{0} - {1}'.format(
@@ -175,18 +186,6 @@ class FavoriteViewSet(CreateDestroyViewSet):
     """Обработка запросов `api/recipes/{id}/favorites`."""
     serializer_class = FavoriteSerializer
     queryset = Favorite.objects.select_related('user').all()
-    permission_classes = [IsAuthenticated]
-
-    @action(methods=['DELETE'], detail=True)
-    def delete(self, request, *args, **kwargs):
-        user = self.request.user
-        recipe = get_object_or_404(Recipe, id=self.kwargs.get('id'))
-        if not self.queryset.filter(user=user, recipe=recipe).exists():
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        self.queryset.get(user=user, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class SubscriptionViewSet(CreateDestroyViewSet):
@@ -220,15 +219,3 @@ class ShoppingViewSet(CreateDestroyViewSet):
     """Обработка запросов `api/recipes/{id}/shopping_cart`."""
     serializer_class = ShoppingSerializer
     queryset = Shopping.objects.select_related('user').all()
-    permission_classes = [IsAuthenticated]
-
-    @action(methods=['DELETE'], detail=True,)
-    def delete(self, request, *args, **kwargs):
-        user = self.request.user
-        recipe = get_object_or_404(Recipe, id=self.kwargs.get('id'))
-        if not Shopping.objects.filter(user=user, recipe=recipe).exists():
-            return Response(
-                status=status.HTTP_400_BAD_REQUEST
-            )
-        Shopping.objects.get(user=user, recipe=recipe).delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
