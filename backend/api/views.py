@@ -142,9 +142,9 @@ class RecipeViewSet(viewsets.ModelViewSet):
         user = self.request.user
         shopping = Shopping.objects.filter(user=user)
         # shopping_cart = {}
-        lines = []
+        # lines = []
         file_name = 'shopping_cart.txt'
-        lines.writelines('Список покупок:\n')
+        # lines.append('Список покупок:\n')
         data = shopping.values_list('recipe__ingredients', flat=True)
         response_content = '\n'.join(data)
         # for elem in shopping:
