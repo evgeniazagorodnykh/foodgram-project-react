@@ -115,7 +115,7 @@ class IngredientSerializer(serializers.ModelSerializer):
 class IngredientCreateRecipeSerializer(serializers.ModelSerializer):
     """Сериализатор модели `Ingredient` для создания рецепта."""
     amount = serializers.IntegerField(min_value=1)
-    id = serializers.IntegerField(min_value=1, source='ingredient__id')
+    id = serializers.IntegerField(min_value=1, source='ingredient_id')
 
     class Meta:
         model = IngredientRecipe
@@ -204,7 +204,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         if not value:
             raise serializers.ValidationError(
                 'Нельзя добавить рецепт без ингредиентов')
-        ingredients = {ingredient['id'] for ingredient in value}
+        ingredients = {ingredient['ingredient__id'] for ingredient in value}
         if len(value) != len(ingredients):
             raise serializers.ValidationError(
                 'Нельзя дважды добавить ингредиент')
@@ -233,7 +233,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         for ingredient in received_ingredients:
             ingredients.append(
                 IngredientRecipe(
-                    ingredient_id=ingredient.pop('id'),
+                    ingredient_id=ingredient.pop('ingredient__id'),
                     amount=ingredient.pop('amount'),
                     recipe=recipe
                 )
