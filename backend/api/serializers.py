@@ -132,7 +132,7 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
     measurement_unit = serializers.CharField(
         source='ingredient.measurement_unit'
     )
-    # id = serializers.IntegerField(min_value=1, source='ingredient.id')
+    id = serializers.IntegerField(min_value=1, source='ingredient.id')
 
     class Meta:
         model = IngredientRecipe
@@ -226,9 +226,7 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         for ingredient in received_ingredients:
             ingredients.append(
                 IngredientRecipe(
-                    ingredient=Ingredient.objects.get(
-                        id=ingredient.pop('ingredient__id')
-                    ),
+                    ingredient_id=ingredient.pop('ingredient__id'),
                     amount=ingredient.pop('amount'),
                     recipe=recipe
                 )
