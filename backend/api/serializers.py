@@ -132,7 +132,7 @@ class IngredientRecipeSerializer(serializers.ModelSerializer):
     measurement_unit = serializers.CharField(
         source='ingredient.measurement_unit'
     )
-    id = serializers.IntegerField(min_value=1, source='ingredient.id')
+    id = serializers.IntegerField(min_value=1, source='ingredient__id')
 
     class Meta:
         model = IngredientRecipe
