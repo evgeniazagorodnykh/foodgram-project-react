@@ -251,7 +251,6 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
         instance.tags.clear()
         self.create_ingredients(ingredients_data, instance)
         instance.tags.set(tags_data)
-        instance.save()
         return instance
 
     def to_representation(self, obj):
@@ -266,7 +265,10 @@ class RecipeWriteSerializer(serializers.ModelSerializer):
 class RecipeReadSerializer(serializers.ModelSerializer):
     """Сериализатор модели `Recipe` для вывода рецепта."""
     image = Base64ImageField(read_only=True)
-    ingredients = serializers.SerializerMethodField()
+    ingredients = IngredientRecipeSerializer(
+        many=True,
+        source='ingredient_recipe'
+    )
     tags = TagSerializer(
         Tag.objects.all(),
         many=True,
@@ -302,10 +304,6 @@ class RecipeReadSerializer(serializers.ModelSerializer):
             user = self.context.get('request').user
             return Shopping.objects.filter(user=user, recipe=obj).exists()
         return False
-
-    def get_ingredients(self, obj):
-        ingredients = IngredientRecipe.objects.filter(recipe=obj)
-        return IngredientRecipeSerializer(ingredients, many=True).data
 
 
 class FavoriteSerializer(serializers.ModelSerializer):
