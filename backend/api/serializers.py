@@ -14,7 +14,7 @@ from recipe.models import (
     Favorite,
     Shopping
 )
-from .fields import Hex2NameColor, Base64ImageField
+from .fields import Hex2NameColor, Base64ImageField, is_subscribed
 
 
 User = get_user_model()
@@ -65,12 +65,7 @@ class CustomUserSerializer(UserSerializer):
         )
 
     def get_is_subscribed(self, obj):
-        if self.context.get('request').user.is_authenticated:
-            user = self.context.get('request').user
-            return Subscription.objects.filter(
-                user=user, subscriber=obj
-            ).exists()
-        return False
+        return is_subscribed(self.context.get('request').user, obj)
 
 
 class TagSerializer(serializers.ModelSerializer):
@@ -402,10 +397,7 @@ class SubscriptionSerializer(serializers.ModelSerializer):
         return Recipe.objects.filter(author=obj.subscriber).count()
 
     def get_is_subscribed(self, obj):
-        return Subscription.objects.filter(
-            user=obj.user,
-            subscriber=obj.subscriber
-        ).exists()
+        return is_subscribed(obj.user, obj.subscriber)
 
     def create(self, validated_data):
         user = self.context.get('request').user

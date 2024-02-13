@@ -3,6 +3,7 @@ import webcolors
 
 from rest_framework import serializers
 from django.core.files.base import ContentFile
+from recipe.models import Subscription
 
 
 class Hex2NameColor(serializers.Field):
@@ -28,3 +29,11 @@ class Base64ImageField(serializers.ImageField):
             data = ContentFile(base64.b64decode(imgstr), name='temp.' + ext)
 
         return super().to_internal_value(data)
+
+
+def is_subscribed(user, subscriber):
+    if user.is_authenticated:
+        return Subscription.objects.filter(
+            user=user, subscriber=subscriber
+        ).exists()
+    return False
