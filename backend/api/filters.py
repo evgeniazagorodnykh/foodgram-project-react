@@ -20,28 +20,20 @@ class ModelFilter(django_filters.FilterSet):
     )
 
     def filter_favorites(self, queryset, name, value):
-        boolean = {0: False, 1: True}
-        list_recipes = []
         user = self.request.user
-        for recipe in queryset:
-            if Favorite.objects.filter(
-                user=user,
-                recipe=recipe,
-            ).exists() == boolean[value]:
-                list_recipes.append(recipe.id)
-        return queryset.filter(id__in=list_recipes)
+        if value == 1:
+            return queryset.filter(id__in=Favorite.objects.filter(
+                user=user
+            ).values_list('recipe', flat=True))
+        return queryset
 
     def filter_shoppings(self, queryset, name, value):
-        boolean = {0: False, 1: True}
-        list_recipes = []
         user = self.request.user
-        for recipe in queryset:
-            if Shopping.objects.filter(
-                user=user,
-                recipe=recipe,
-            ).exists() == boolean[value]:
-                list_recipes.append(recipe.id)
-        return queryset.filter(id__in=list_recipes)
+        if value == 1:
+            return queryset.filter(id__in=Shopping.objects.filter(
+                user=user
+            ).values_list('recipe', flat=True))
+        return queryset
 
     class Meta:
         model = Recipe

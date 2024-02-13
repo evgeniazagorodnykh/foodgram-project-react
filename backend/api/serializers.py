@@ -51,7 +51,7 @@ class CustomUserCreateSerializer(UserCreateSerializer):
 
 class CustomUserSerializer(UserSerializer):
     """Сериализатор модели `User` для вывода."""
-    is_subscribed = serializers.SerializerMethodField('get_is_subscribed')
+    is_subscribed = serializers.SerializerMethodField()
 
     class Meta:
         model = User
@@ -64,7 +64,7 @@ class CustomUserSerializer(UserSerializer):
             'is_subscribed'
         )
 
-    def is_subscribed(self, obj):
+    def get_is_subscribed(self, obj):
         if self.context.get('request').user.is_authenticated:
             user = self.context.get('request').user
             return Subscription.objects.filter(
