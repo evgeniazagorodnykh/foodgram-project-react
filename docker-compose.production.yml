@@ -25,12 +25,13 @@ services:
     volumes:
       - static_frontend:/app/result_build/
   nginx:
-    image: evgeniazagorodnykh/foodgram_nginx_new
+    image: nginx:1.19.3
     env_file: .env
     ports:
       - 8080:80
       #- 80:80
     volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf
       - static:/static_django/
       - media:/media/
       - ./docs/:/usr/share/nginx/html/api/docs/
