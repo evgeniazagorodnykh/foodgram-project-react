@@ -4,6 +4,7 @@ from recipe.models import Recipe, Favorite, Shopping
 
 
 class ModelFilter(django_filters.FilterSet):
+    """Фильтр модели `Recipe`."""
     tags = django_filters.AllValuesMultipleFilter(
         field_name='tags__slug',
     )
