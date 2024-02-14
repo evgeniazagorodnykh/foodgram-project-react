@@ -76,19 +76,6 @@ class CustomUserViewSet(UserViewSet):
             self.permission_classes = [IsAuthenticated]
         return super().get_permissions()
 
-    def get_serializer_context(self):
-        context = super().get_serializer_context()
-        user = self.request.user
-        if self.action == "me":
-            subscriber = self.request.user
-        else:
-            subscriber = User.objects.get(id=self.kwargs.get('id'))
-        context.update({
-            "sub_user": user,
-            "subscriber": subscriber
-        })
-        return context
-
     @action(
         methods=['GET'],
         detail=False,
@@ -203,14 +190,10 @@ class SubscriptionViewSet(CreateDestroyViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_serializer_context(self):
-        user = self.request.user
-        subscriber = get_object_or_404(User, id=self.kwargs.get('id'))
         limit = self.request.GET.get('recipes_limit', None)
         context = super().get_serializer_context()
         context.update({
             'recipes_limit': limit,
-            'sub_user': user,
-            'subscriber': subscriber
         })
         return context
 
