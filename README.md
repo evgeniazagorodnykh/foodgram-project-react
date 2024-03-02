@@ -13,7 +13,7 @@
 scp -i path_to_SSH/SSH_name docker-compose.production.yml \
     username@server_ip:/home/username/foodgram/docker-compose.production.yml
 ```
-Выполните эту команду на сервере в папке kittygram/:
+Выполните эту команду на сервере в папке foodgram/:
 ```
 sudo docker compose -f docker-compose.production.yml up -d
 ```
@@ -25,7 +25,3 @@ sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/sta
 ```
 Обновите конфиг Nginx и переагрузите его.
 Откройте в браузере страницу проекта https://foodblog.serveblog.net/
-
-## Суперюзер:
-Email: evgenia@mail.ru
-Password: bounty08
