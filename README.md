@@ -1,6 +1,6 @@
-# praktikum_new_diplom
+# Foodgram
 
-### Foodgram
+<img width="946" alt="image" src="https://github.com/evgeniazagorodnykh/foodgram-project-react/assets/129388336/f4168729-cab6-418f-acd3-7dfbfe1716ef">
 
 ## Описание
 
@@ -25,3 +25,5 @@ sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/sta
 ```
 Обновите конфиг Nginx и переагрузите его.
 Откройте в браузере страницу проекта https://foodblog.serveblog.net/
+
+
