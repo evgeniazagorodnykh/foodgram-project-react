@@ -26,4 +26,6 @@ sudo docker compose -f docker-compose.production.yml exec backend cp -r /app/sta
 Обновите конфиг Nginx и переагрузите его.
 Откройте в браузере страницу проекта https://foodblog.serveblog.net/
 
+# Автор проекта:
+[Евгения Загородных](https://github.com/evgeniazagorodnykh)\
 
